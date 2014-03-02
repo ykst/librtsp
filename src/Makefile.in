@@ -1,0 +1,28 @@
+TARGET=librtsp
+SHARELIB_TARGET=$(TARGET).so
+STATICLIB_TARGET=$(TARGET).a
+LIBHEADERS=$(@INC_DIR@/rtsp_server.h)
+PRIVHEADERS=$(wildcard *.h)
+
+
+SRCS=rtsp.c rtp.c mime.c
+OBJS=$(SRCS:%.c=%.o)
+CFLAGS= -Wall -Wstrict-aliasing=1 -O3 -I@INC_DIR@
+LFLAGS= -lpthread
+
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	@CC@ -fPIC -shared -o @LIB_DIR@/$(SHARELIB_TARGET) $^ $(LFLAGS)
+	@AR@ rc @LIB_DIR@/$(STATICLIB_TARGET) $^ 
+
+%.o: %.c $(LIBHEADERS) $(PRIVHEADERS)
+	@CC@ $(CFLAGS) -c $<
+
+
+install: all
+	@INSTALL_APP@ @LIB_DIR@/$(SHARELIB_TARGET) @MASTER_ROOTDIR@/usr/lib
+
+clean:
+	$(RM) $(OBJS)
